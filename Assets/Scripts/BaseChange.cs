@@ -37,7 +37,7 @@ public class BaseChange : MonoBehaviour
         //return new Quaternion(qRight.x, qRight.z, qRight.y, -qRight.w);
     }
 
-    public Quaternion ConvertLeftToRight(Quaternion qLeft, Transform transform)
+    public Quaternion ConvertLeftToRight(Quaternion qLeft, Transform t)
     {
         /*
         float4x4 tMatrix2 = math.mul(_leftToRight, t.localToWorldMatrix);
