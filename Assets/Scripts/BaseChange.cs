@@ -7,79 +7,50 @@ using System;
 
 public class BaseChange : MonoBehaviour
 {
-    protected Transform[] _srcList;
-    protected Transform[] _destList;
-    public Transform _destParent;
-    public Transform _srcParent;
+    public float4x4 _leftToRight;
 
-    public float4x4 _tMatrix;
-
-    // Start is called before the first frame update
-    void Awake()
-    {
-        if (_srcParent == null || _destParent ==null)
-            return;
-
-        _srcList = new Transform[_srcParent.childCount];
-        _destList = new Transform[_srcParent.childCount];
-        
-        for(int c = 0; c < _srcParent.childCount; c++)
-        {
-            var i = _srcParent.GetChild(c);            
-            var o = Instantiate(i.gameObject, _destParent);
-            var oscListO = o.GetComponents<OSCTransmitterInformer>();
-            var oscListI = i.GetComponents<OSCTransmitterInformer>();
-            for (int j=0;j< oscListI.Length; j++)
-            {
-                oscListI[j].TransmitterAddress += $"-{_srcParent.name}-";
-                oscListO[j].TransmitterAddress += $"-{_destParent.name}-";
-            }
-
-            _srcList[c] = i;
-            _destList[c] = o.transform;
-        }
-    }
 
     public Vector3 ConvertRightToLeft(Vector3 p)
     {
         float4 p4 = new float4(p.x, p.y, p.z, 0);
-        float4 pOut = math.mul(math.transpose(_tMatrix), p4);        
+        float4 pOut = math.mul(math.transpose(_leftToRight), p4);        
         return new Vector3(pOut.x, pOut.y, pOut.z);
     }
 
     public Vector3 ConvertLeftToRight(Vector3 p)
     {
         float4 p4 = new float4(p.x, p.y, p.z, 0);
-        float4 pOut = math.mul(_tMatrix, p4);
+        float4 pOut = math.mul(_leftToRight, p4);
         return new Vector3(pOut.x, pOut.y, pOut.z);
     }
 
-    public Quaternion ConvertRightToLeft(Quaternion q, Transform t)
+    public Quaternion ConvertRightToLeft(Quaternion qRight, Transform transform)
     {
-        float4x4 tMatrix2 = math.mul(_tMatrix, t.localToWorldMatrix);
-
-        return Quaternion.LookRotation(tMatrix2.c2.xyz, tMatrix2.c1.xyz);       
-    }
-
-    public Quaternion ConvertLeftToRight(Quaternion q, Transform t)
-    {
-        float4x4 tMatrix2 = math.mul(_tMatrix, t.localToWorldMatrix);
-
+        Matrix4x4 m44 = transform.localToWorldMatrix;
+        m44.SetTRS(Vector3.zero, qRight, Vector3.one);
+        float4x4 rightToLeft = math.transpose(_leftToRight);
+        float4x4 tMatrix2 = math.mul(m44, _leftToRight);        
+        tMatrix2 = math.mul(rightToLeft , tMatrix2);
+        
         return Quaternion.LookRotation(tMatrix2.c2.xyz, tMatrix2.c1.xyz);
+        
+        //return new Quaternion(qRight.x, qRight.z, qRight.y, -qRight.w);
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    public Quaternion ConvertLeftToRight(Quaternion qLeft, Transform transform)
     {
-        if (_srcParent == null || _destParent == null)
-            return;
-        for (int i = 0; i < _srcList.Length; i++)
-        {
-            // position  
-            _destList[i].localPosition = ConvertLeftToRight(_srcList[i].localPosition);
+        /*
+        float4x4 tMatrix2 = math.mul(_leftToRight, t.localToWorldMatrix);
+        return Quaternion.LookRotation(tMatrix2.c2.xyz, tMatrix2.c1.xyz);
+        */
+        Matrix4x4 m44 = transform.localToWorldMatrix;
+        m44.SetTRS(Vector3.zero, qLeft, Vector3.one);
+        float4x4 rightToLeft = math.transpose(_leftToRight);
 
-            //orientation  
-            _destList[i].localRotation = ConvertLeftToRight(_srcList[i].localRotation, _srcList[i].transform);
-        }
+        float4x4 tMatrix2 = math.mul(m44, rightToLeft);
+        tMatrix2 = math.mul(_leftToRight, tMatrix2);
+        
+        return Quaternion.LookRotation(tMatrix2.c2.xyz, tMatrix2.c1.xyz);
+        
     }
 }
