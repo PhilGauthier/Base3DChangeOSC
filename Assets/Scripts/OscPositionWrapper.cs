@@ -5,7 +5,7 @@ using extOSC;
 using extOSC.Core.Events;
 using UnityEngine.Events;
 
-public class OscWrapper : MonoBehaviour
+public class OscPositionWrapper : MonoBehaviour
 {
     public BaseChange _bs;
     public Transform _localRightTransform;
