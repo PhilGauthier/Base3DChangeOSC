@@ -6,4 +6,4 @@ Simple demo projet to show 3d base change of the coordinate system between Unity
 
 It uses :
 - OSC protocol ([ExtOSC package](https://github.com/Iam1337/extOSC)) for communication between Unity and TouchDesigner.
-- [Unity.Mathematics](https://github.com/Unity-Technologies/Unity.Mathematics) for basic matrix computations
+- [Unity.Mathematics](https://github.com/Unity-Technologies/Unity.Mathematics) for basic matrix computations (download repository and update path in Base3DChangeOSC/Packages/manifest.json)
